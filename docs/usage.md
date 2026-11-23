@@ -29,6 +29,8 @@ In that example the package won't touch `path_to_image` and will write an optimi
 
 For guarantees about replacing the original, see [keeping the original safe](#keeping-the-original-safe).
 
+<a id="setting-a-timeout"></a>
+
 ## Setting a timeout
 
 You can set the maximum of time in seconds that each individual optimizer in a chain can use by calling `set_timeout`:
@@ -42,6 +44,8 @@ optimizer_chain
 ```
 
 In this example each optimizer in the chain gets a maximum of 10 seconds to do its job.
+
+<a id="handling-errors"></a>
 
 ## Handling errors
 
