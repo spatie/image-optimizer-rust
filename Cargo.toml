@@ -1,0 +1,22 @@
+[package]
+name = "spatie-image-optimizer"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "Optimize images with a configurable chain of native tools"
+license = "MIT"
+keywords = ["image", "optimization", "compression"]
+categories = ["multimedia::images"]
+
+[dependencies]
+file-format = { version = "0.29", features = ["reader-txt", "reader-xml"] }
+same-file = "1"
+tempfile = "3"
+thiserror = "2"
+tracing = "0.1"
+url = "2"
+wait-timeout = "0.2"
+
+[profile.release]
+lto = "thin"
+strip = true
