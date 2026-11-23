@@ -12,6 +12,8 @@ spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust
 
 Requires Rust 1.89 or newer. The crate is not yet published to crates.io. Commit your application's `Cargo.lock` to keep the selected Git revision between builds.
 
+<a id="optimization-tools"></a>
+
 ## Optimization tools
 
 The package uses these optimizers for matching image formats:

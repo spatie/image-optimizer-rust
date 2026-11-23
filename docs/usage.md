@@ -135,6 +135,8 @@ Sometimes an optimizer has no binary to run, for example one that sends the imag
 
 Set your network client's timeout from the supplied duration. Keep scratch files in owners such as `tempfile::NamedTempFile` so they are removed before the error callback runs. Failures use the same error policy as binary optimizers.
 
+<a id="keeping-the-original-safe"></a>
+
 ## Keeping the original safe
 
 Enable `safe_output(true)` to optimize a working copy before replacing the destination:
@@ -205,6 +207,8 @@ or protect against another process changing paths during the operation.
 
 The existing `optimize` and `optimize_to` methods also honor safe output, but discard the report.
 Call `.safe_output(false)` to restore the default direct-write behavior.
+
+<a id="reading-optimization-reports"></a>
 
 ## Reading optimization reports
 
