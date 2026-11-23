@@ -10,17 +10,19 @@ let optimizer_chain = OptimizerChainFactory::create();
 optimizer_chain.optimize(path_to_image)?;
 ```
 
-The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image. Install the [binaries you need](docs/installation-and-setup.md#optimization-tools) first. Missing binaries are logged and the chain continues; they are not skipped by an installation check.
+The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image.
 
 Here are some [example conversions](docs/example-conversions.md) that have been done by this package.
 
-To keep the original image, use `optimize_to(path_to_image, path_to_output)`. To replace a file only when optimization succeeds and makes it smaller, enable [safe output](docs/usage.md#keeping-the-original-safe).
+Install the [optimization tools](docs/installation-and-setup.md#optimization-tools) first. See [usage](docs/usage.md) to keep the original image or enable safe output.
 
 This is the Rust version of [spatie/image-optimizer](https://github.com/spatie/image-optimizer).
 
 ## Support us
 
-Support our open source work by [buying one of our products](https://spatie.be/open-source/support-us).
+We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+
+We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
 ## Installation
 
@@ -39,22 +41,15 @@ Use `.throws(true)` to make failures abort instead.
 
 ## Which tools will do what?
 
-The [tool reference](docs/which-tools-will-do-what.md) lists the exact defaults for
-JPEG, PNG, SVG, GIF, WebP and AVIF, including the AVIF decode/encode sequence.
+The package will automatically decide which tools to use on a particular image. See [which tools will do what](docs/which-tools-will-do-what.md) for the options used by each optimizer.
 
 ## Usage
 
-See [usage](docs/usage.md) for timeouts, errors, quality, custom chains and custom optimizers.
-Binary commands use literal arguments without a shell. For example, use `["-q", "85"]`, not `["-q 85"]`.
-
-The guide also covers [safe output](docs/usage.md#keeping-the-original-safe) and
-[optimization reports](docs/usage.md#reading-optimization-reports), including what happens when
-files grow, binaries are missing or encoders fail. The original methods still return `Result<(), Error>`;
-`optimize_with_report` and `optimize_to_with_report` add sizes, timing and per-optimizer outcomes.
+See [usage](docs/usage.md) for timeouts, errors, custom chains and custom optimizers. The [PHP and Rust API reference](PARITY.md) covers quality settings, literal command arguments and Rust-specific behavior. [Safe output and reports](docs/parity.md) are opt-in additions.
 
 ## Logging the optimization process
 
-Use `.use_logger(TracingLogger)` or a custom logger. See [logging](docs/logging-the-optimization-process.md).
+To verify what the package is doing you can set a logger. The package will write to log which optimizers are used, which commands are executed and their output. See [logging the optimization process](docs/logging-the-optimization-process.md).
 
 ## Example conversions
 
@@ -78,29 +73,29 @@ cargo test --locked --test native_tools -- --ignored --nocapture
 cargo test --locked --test documentation -- --ignored
 ```
 
-The last two commands require the native tools. CI runs them in a separate Linux job.
-The other tests do not require installed codecs.
+The last two commands require the native tools. The other tests do not require installed codecs. Native tests check that all six formats shrink, source files remain unchanged, and AVIF output can be decoded. They also check quality settings and cleanup after an encoder failure.
+
+CI runs on Linux, macOS and Windows, checks Rust 1.89 on Linux, and runs rustfmt, Clippy and rustdoc. A separate Linux job runs the native and documentation tests with the tools installed.
 
 The `documentation` target compiles and runs every Rust code block from this README and `docs/` with temporary images and application context. Rustdoc skips these fragments; this target executes them.
 
 ## Contributing
 
-See [Spatie's contribution guidelines](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md).
-The [PHP and Rust API guide](docs/parity.md) shows the corresponding method names and differences to keep in mind.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security
 
-Report security issues to [security@spatie.be](mailto:security@spatie.be).
-Only local files are accepted. Native image tools process untrusted data in your process's security context;
-keep them updated and use operating-system isolation for untrusted uploads. Default in-place optimization is not
-transactional. An encoder failure can leave a partial output. Use `safe_output(true)` to work on a copy
-and publish only a smaller, error-free candidate. This is not a sandbox or an image-validity check.
-Use `optimize_to` when you also want to keep the source after successful optimization.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
+
+Only local files are accepted. Native image tools process untrusted data in your process's security context; keep them updated and use operating-system isolation for untrusted uploads. Default in-place optimization is not transactional. An encoder failure can leave a partial output. Use `safe_output(true)` to work on a copy and publish only a smaller, error-free candidate. This is not a sandbox or an image-validity check. Use `optimize_to` when you also want to keep the source after successful optimization. Read the [full safety contract](PARITY.md#keeping-the-original-safe) before relying on replacement guarantees.
 
 ## Postcardware
 
-If you use this package in production, we'd appreciate a postcard from your hometown.
-Our address is Spatie, Kruikstraat 22, 2018 Antwerp, Belgium.
+You're free to use this package (it's [MIT-licensed](LICENSE.md)), but if it makes it to your production environment we highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using.
+
+Our address is: Spatie, Kruikstraat 22, 2018 Antwerp, Belgium.
+
+We publish all received postcards [on our company website](https://spatie.be/open-source/postcards).
 
 ## Credits
 
@@ -109,4 +104,4 @@ Test images are copied from the PHP package; the photo is by Jeff Sheldon via Un
 
 ## License
 
-MIT. See [LICENSE.md](LICENSE.md).
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

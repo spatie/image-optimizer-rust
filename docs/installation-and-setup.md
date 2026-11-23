@@ -10,7 +10,7 @@ You can install the package via Cargo. Add this Git dependency to your `Cargo.to
 spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust", branch = "main" }
 ```
 
-Requires Rust 1.89 or newer. The crate is not yet published to crates.io. Commit your application's `Cargo.lock` to keep the selected Git revision between builds.
+Requires Rust 1.89 or newer. Not yet published to crates.io.
 
 <a id="optimization-tools"></a>
 
@@ -47,6 +47,4 @@ sudo dnf install jpegoptim optipng pngquant gifsicle libwebp-tools libavif-tools
 npm install -g svgo@3
 ```
 
-Install only the formats you need. AVIF needs both `avifdec` and `avifenc` (libavif 0.9.3 or newer
-with the documented options). On Windows install native executables and add them to `PATH`, or use
-`set_binary_path`. Node is required only for the external SVGO tool, not for the Rust library.
+AVIF needs both `avifdec` and `avifenc`. See [native-tool requirements](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#inputs-and-native-tools) for Windows setup, versions and executable overrides.

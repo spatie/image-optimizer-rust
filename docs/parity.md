@@ -3,35 +3,64 @@ title: PHP and Rust API
 weight: 10
 ---
 
-If you've used [spatie/image-optimizer](https://github.com/spatie/image-optimizer), most method names will look familiar. This table shows how to use the same operations in Rust.
+See [PARITY.md](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md) for method mappings, configuration and the complete safety/reporting contract.
 
-| PHP feature | Rust API |
-| --- | --- |
-| `Image` construction, MIME, path, extension | `Image::new`, `mime`, `path`, `extension` |
-| `OptimizerChainFactory::create()` | `OptimizerChainFactory::create()` |
-| quality configuration | `OptimizerChainFactory::with_quality(q)?` |
-| explicit factory optimizer config | `OptimizerChain::new().add_optimizer(...)` |
-| chain inspection, append, replace | `get_optimizers`, `add_optimizer`, `set_optimizers` |
-| `setTimeout` | `set_timeout(Duration)` |
-| `useLogger` / `DummyLogger` | `use_logger` / `DummyLogger`, plus `TracingLogger` |
-| `throws(true/false)` | `throws(true/false)` |
-| `throws(callable)` | `on_error` returning `Result` |
-| `optimize(path)` | `optimize(path)` |
-| `optimize(input, output)` | `optimize_to(input, output)` |
-| seven optimizer classes | `Tool::{Jpegoptim,Pngquant,Optipng,Svgo,Gifsicle,Cwebp,Avifenc}.with_options(...)` |
-| options, binary path and executable overrides | `set_options`, `set_binary_path`, `set_binary_name`, `set_decode_binary_name` |
-| image path + shell command construction | borrowed `Image` + `BinaryOptimizer::command` returning `Command` |
-| `SelfHandlingOptimizer` and base class | `Optimizer` trait with `optimize` |
-| `getTmpPath` and chain cleanup | RAII temporary PNG owned by AVIF optimization; custom optimizers own their resources |
+<a id="keeping-the-original-safe"></a>
 
-Use the `Optimizer` trait for both command-line tools and optimizers that call an API. Configuration methods consume and return the chain, so keep the returned value or chain the calls together. Methods that can fail return `Result`; use `?` to pass an error to your caller.
+## Keeping the original safe
 
-## Differences to keep in mind
+Enable `safe_output(true)` to optimize a working copy before replacing the destination:
 
-- Options are literal arguments, not shell commands. Pass a flag and its value as separate items, such as `["-q", "85"]`.
-- Input must be a regular local file. Local file URLs are resolved to paths. A separate output must not point to the source, including through hard links.
-- MIME detection uses a bundled Rust database rather than PHP's system libmagic, so unusual files may be classified differently.
-- Rust panics are not caught. Custom optimizers must implement `Send + Sync` and own their temporary files so Rust can clean them up when they go out of scope.
-- Native-tool versions affect encoded bytes and accepted options. Check the tool versions when comparing results across systems.
+```rust,ignore
+use spatie_image_optimizer::{OptimizerChainFactory, OutputStatus};
 
-You can also enable [safe output](usage.md#keeping-the-original-safe) or request [optimization reports](usage.md#reading-optimization-reports). These are additions to the PHP API. They are opt-in; the default methods still write directly and return `Result<(), Error>`.
+let report = OptimizerChainFactory::create()
+    .safe_output(true)
+    .optimize_with_report(path_to_image)?;
+
+match report.status {
+    OutputStatus::Written => println!("Saved {} bytes", report.bytes_saved()),
+    OutputStatus::KeptOriginal => println!("No size reduction; kept the original"),
+    OutputStatus::Discarded => eprintln!("An optimizer failed; kept the original"),
+}
+```
+
+To preserve the source and use a separate destination:
+
+```rust,ignore
+use spatie_image_optimizer::OptimizerChainFactory;
+
+let report = OptimizerChainFactory::create()
+    .safe_output(true)
+    .throws(true)
+    .optimize_to_with_report(path_to_image, path_to_output)?;
+println!("{:?}: {} bytes saved", report.status, report.bytes_saved());
+```
+
+Read the [safety contract](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#keeping-the-original-safe). This is not a sandbox or an image-validity check.
+
+<a id="reading-optimization-reports"></a>
+
+## Reading optimization reports
+
+Use `optimize_with_report` or `optimize_to_with_report` with any chain, with or without safe output:
+
+```rust,ignore
+use spatie_image_optimizer::{OptimizerChainFactory, OptimizerStatus};
+
+let report = OptimizerChainFactory::create()
+    .safe_output(true)
+    .optimize_with_report(path_to_image)?;
+
+println!("Input: {} bytes; candidate: {:?}; elapsed: {:?}",
+    report.original_bytes, report.candidate_bytes, report.elapsed);
+for optimizer in &report.optimizers {
+    match &optimizer.status {
+        OptimizerStatus::Succeeded => println!("{}: completed in {:?}", optimizer.name, optimizer.elapsed),
+        OptimizerStatus::Skipped => println!("{}: unsupported format", optimizer.name),
+        OptimizerStatus::Failed(message) => eprintln!("{}: {message}", optimizer.name),
+    }
+}
+```
+
+See the [field reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#reading-optimization-reports). Aborted chains return `Err`, not partial reports.

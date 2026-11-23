@@ -5,7 +5,9 @@ weight: 7
 
 Here are some real life example conversions done by this package.
 
-The JPG, WebP, AVIF, PNG and SVG sources are the same images used by [spatie/image-optimizer](https://github.com/spatie/image-optimizer#example-conversions), optimized with the Rust package's default chain. The photo by [Jeff Sheldon](https://unsplash.com/photos/jTeQavJjBDs) was resized to 2048 pixels wide for the original PHP examples. We used those existing fixtures without resizing them again. The GIF is an additional test fixture in this Rust package.
+Methodology for JPG, WEBP, AVIF images: the [original image](https://unsplash.com/photos/jTeQavJjBDs) has been fed to [spatie/image](https://github.com/spatie/image) (using the default GD driver) and resized to 2048px width.
+
+These are the existing [PHP fixtures](https://github.com/spatie/image-optimizer#example-conversions), optimized with the Rust package's default chain without resizing again. The GIF is an additional Rust test fixture.
 
 | Format | Original bytes | Optimized bytes | Reduction |
 | --- | ---: | ---: | ---: |
@@ -52,7 +54,8 @@ Photo credit: Jeff Sheldon, via [Unsplash](https://unsplash.com).
 
 ## png
 
-Original, Photoshop "Save for web" export with transparency, 40,302 bytes:
+Original: Photoshop 'Save for web' | PNG-24 with transparency<br>
+40,302 bytes
 
 ![Original PNG logo](/docs/image-optimizer-rust/v1/examples/original-logo.png)
 
@@ -62,7 +65,8 @@ Optimized, 9,764 bytes (75.77% smaller):
 
 ## svg
 
-Original, Illustrator web-optimized export, 25,586 bytes:
+Original: Illustrator | Web optimized SVG export<br>
+25,586 bytes
 
 ![Original SVG graph](/docs/image-optimizer-rust/v1/examples/original-graph.svg)
 

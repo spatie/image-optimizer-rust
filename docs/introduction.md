@@ -13,8 +13,8 @@ let optimizer_chain = OptimizerChainFactory::create();
 optimizer_chain.optimize(path_to_image)?;
 ```
 
-The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image. Install the [binaries you need](installation-and-setup.md#optimization-tools) first. Missing binaries are logged and the chain continues; they are not skipped by an installation check.
+The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image.
 
 Here are some [example conversions](example-conversions.md) that have been done by this package.
 
-To keep the original image, use `optimize_to(path_to_image, path_to_output)`. If you only want to replace a file when optimization succeeds and makes it smaller, enable [safe output](usage.md#keeping-the-original-safe).
+Install the [optimization tools](installation-and-setup.md#optimization-tools) first. See [usage](usage.md) to keep the original image or enable safe output.
