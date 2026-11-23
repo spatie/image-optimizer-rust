@@ -1,20 +1,139 @@
 ---
 title: Usage
-weight: 4
+weight: 5
 ---
+
+This is the default way to use the package:
 
 ```rust,no_run
 use spatie_image_optimizer::OptimizerChainFactory;
 
-let chain = OptimizerChainFactory::create();
-chain.optimize("photo.jpg")?;
-chain.optimize_to("photo.jpg", "optimized.jpg")?;
+let optimizer_chain = OptimizerChainFactory::create();
+optimizer_chain.optimize("photo.jpg")?;
 # Ok::<(), spatie_image_optimizer::Error>(())
 ```
 
-`optimize` overwrites in place. `optimize_to` copies the source before optimizing the copy.
-Output parent directories must exist. Input and output aliases, including hard links, are rejected.
-Neither operation guarantees a smaller image or atomic replacement. Non-image files pass through unchanged.
+The image at `photo.jpg` will be overwritten by an optimized version. The package automatically decides which tools to use for the image's format. Make sure the [binaries you need](installation-and-setup.md#optimization-tools) are installed.
+
+To keep the original image, use `optimize_to` with a separate output path:
+
+```rust,no_run
+use spatie_image_optimizer::OptimizerChainFactory;
+
+let optimizer_chain = OptimizerChainFactory::create();
+optimizer_chain.optimize_to("photo.jpg", "optimized.jpg")?;
+# Ok::<(), spatie_image_optimizer::Error>(())
+```
+
+In that example the package won't touch `photo.jpg` and will write the optimized version to `optimized.jpg`. The output directory must already exist, and the output must not refer to the source, including through a hard link.
+
+Neither method guarantees a smaller image. A failed optimizer can leave partial changes. Use [safe output](#keeping-the-original-safe) to replace a file only when all matching optimizers succeed and the result is smaller. Non-image files pass through unchanged.
+
+## Setting a timeout
+
+You can set the maximum time that each individual optimizer in a chain can use by calling `set_timeout`:
+
+```rust,no_run
+use spatie_image_optimizer::OptimizerChainFactory;
+use std::time::Duration;
+
+OptimizerChainFactory::create()
+    .set_timeout(Duration::from_secs(10))
+    .optimize("photo.jpg")?;
+# Ok::<(), spatie_image_optimizer::Error>(())
+```
+
+In this example each optimizer in the chain gets a maximum of 10 seconds to do its job. The default is 60 seconds per optimizer, not per chain. Zero disables binary timeouts. A timed-out binary is killed and reaped, but independently spawned descendants are not. Custom self-handling optimizers must enforce their own timeout.
+
+## Handling errors
+
+By default, when an optimizer fails, the failure is logged and the chain continues with the next optimizer. This includes missing binaries and timeouts. If you'd rather abort the whole chain, use `throws(true)`:
+
+```rust,no_run
+use spatie_image_optimizer::OptimizerChainFactory;
+
+OptimizerChainFactory::create().throws(true).optimize("photo.jpg")?;
+# Ok::<(), spatie_image_optimizer::Error>(())
+```
+
+Pass `false` to keep the default log-and-continue behavior explicitly:
+
+```rust,no_run
+use spatie_image_optimizer::OptimizerChainFactory;
+
+OptimizerChainFactory::create().throws(false).optimize("photo.jpg")?;
+# Ok::<(), spatie_image_optimizer::Error>(())
+```
+
+Or pass a closure to `on_error` to decide for yourself. The handler receives the error, the optimizer that failed and the image being optimized. Return `Ok(())` to continue with the next optimizer, or `Err(...)` to abort the chain:
+
+```rust,no_run
+use spatie_image_optimizer::{Error, OptimizerChainFactory};
+
+OptimizerChainFactory::create()
+    .on_error(|error, optimizer, image| {
+        eprintln!("{} failed for {}: {error}", optimizer.name(), image.path().display());
+        Ok(())
+    })
+    .optimize("photo.jpg")?;
+
+let abort = OptimizerChainFactory::create()
+    .on_error(|_, _, _| Err(Error::Custom("aborted".into())));
+# Ok::<(), Error>(())
+```
+
+Calling `throws` replaces a custom handler. `Error::Process` includes the exit code, stdout and stderr. Validation and output-copy errors always return `Err`; Rust panics are not caught.
+
+## Creating your own optimization chains
+
+If you want to customize the chain of optimizers, you can do so by adding optimizers manually to an `OptimizerChain`.
+
+Here's an example where we only want `jpegoptim` and `pngquant` to be used:
+
+```rust,no_run
+use spatie_image_optimizer::{OptimizerChain, Tool};
+
+let chain = OptimizerChain::new()
+    .add_optimizer(Tool::Jpegoptim.with_options(["--strip-all", "--all-progressive"]))
+    .add_optimizer(Tool::Pngquant.with_options(["--force"]));
+chain.optimize("photo.jpg")?;
+# Ok::<(), spatie_image_optimizer::Error>(())
+```
+
+Notice that you can pass the options an optimizer should use to `with_options`. Each item is one literal argument. Use `["-q", "85"]`, not `["-q 85"]`; no shell expansion, pipelines or redirection occurs.
+
+Use `set_options` to replace arguments, `set_binary_path` to select a directory containing the binaries, `set_binary_name` to select another executable, and `set_decode_binary_name` to override the AVIF decoder. `set_optimizers(Vec<Box<dyn Optimizer>>)` replaces the chain; `get_optimizers()` gives you its entries in execution order.
+
+For a default chain with a different quality, use `OptimizerChainFactory::with_quality(50)?`.
+
+## Writing custom optimizers
+
+Want to use another command-line utility to optimize your images? Write your own optimizer by implementing the `Optimizer` trait. Use `can_handle` to choose the supported images, and `optimize` to run the tool:
+
+```rust,no_run
+use spatie_image_optimizer::{Error, Image, Logger, Optimizer, OptimizerChain, run_command};
+use std::{process::Command, time::Duration};
+
+struct MyOptimizer;
+impl Optimizer for MyOptimizer {
+    fn name(&self) -> &str { "my-optimizer" }
+    fn can_handle(&self, image: &Image) -> bool { image.mime().is_ok_and(|mime| mime == "image/png") }
+    fn optimize(&self, image: &Image, logger: &dyn Logger, timeout: Duration) -> Result<(), Error> {
+        run_command(Command::new("my-optimizer").arg(image.path()), timeout, logger)
+    }
+}
+
+OptimizerChain::new().add_optimizer(MyOptimizer).optimize("logo.png")?;
+# Ok::<(), Error>(())
+```
+
+You can add your optimizer to any chain using `add_optimizer`. For more examples, take a look at [the existing optimizers](https://github.com/spatie/image-optimizer-rust/blob/main/src/optimizers.rs) shipped with this package.
+
+## Writing an optimizer without a binary
+
+Sometimes an optimizer has no binary to run, for example one that sends the image to an external optimization API. Implement the same `Optimizer` trait and write the optimized bytes back to `image.path()`. Return `Ok(())` on success or `Err(...)` on failure.
+
+Set your network client's timeout from the supplied duration. Keep scratch files in owners such as `tempfile::NamedTempFile` so they are removed before the error callback runs. Failures use the same error policy as binary optimizers.
 
 ## Keeping the original safe
 
@@ -125,94 +244,3 @@ for optimizer in &report.optimizers {
 Without safe output, `Written` does not promise smaller, valid or complete output: continued errors
 may have left partial changes. For typed process errors, use `on_error` or `.throws(true)`.
 An aborted chain returns `Err` rather than a partial report.
-
-## Setting a timeout
-
-```rust,no_run
-use spatie_image_optimizer::OptimizerChainFactory;
-use std::time::Duration;
-
-OptimizerChainFactory::create()
-    .set_timeout(Duration::from_secs(10))
-    .optimize("photo.jpg")?;
-# Ok::<(), spatie_image_optimizer::Error>(())
-```
-
-The default is 60 seconds per optimizer, not per chain. Zero disables binary timeouts.
-A timed-out binary is killed and reaped. The library does not kill independently spawned descendants.
-Custom self-handling optimizers are responsible for their own timeout enforcement.
-
-## Handling errors
-
-By default optimizer failures, missing binaries and timeouts are logged and the chain continues.
-Validation and output-copy errors always return an `Err`. Rust panics are not caught.
-
-```rust,no_run
-use spatie_image_optimizer::{Error, OptimizerChainFactory};
-
-OptimizerChainFactory::create().throws(true).optimize("photo.jpg")?;
-OptimizerChainFactory::create().throws(false).optimize("photo.jpg")?;
-
-OptimizerChainFactory::create()
-    .on_error(|error, optimizer, image| {
-        eprintln!("{} failed for {}: {error}", optimizer.name(), image.path().display());
-        Ok(())
-    })
-    .optimize("photo.jpg")?;
-
-let abort = OptimizerChainFactory::create()
-    .on_error(|_, _, _| Err(Error::Custom("aborted".into())));
-# Ok::<(), Error>(())
-```
-
-The handler receives the error, optimizer and image. Return `Ok(())` to continue or `Err(...)` to abort.
-Calling `throws` replaces a custom handler. `Error::Process` includes the exit code, stdout and stderr.
-
-## Creating your own optimization chains
-
-```rust,no_run
-use spatie_image_optimizer::{OptimizerChain, Tool};
-
-let chain = OptimizerChain::new()
-    .add_optimizer(Tool::Jpegoptim.with_options(["--strip-all", "--all-progressive"]))
-    .add_optimizer(Tool::Pngquant.with_options(["--force"]).set_binary_path("/opt/image-tools"));
-chain.optimize("photo.jpg")?;
-# Ok::<(), spatie_image_optimizer::Error>(())
-```
-
-`set_optimizers(Vec<Box<dyn Optimizer>>)` replaces the chain. `get_optimizers()` exposes its ordered entries.
-Use `set_options` to replace arguments, `set_binary_name` to select another executable and
-`set_decode_binary_name` to override the AVIF decoder. Each option is one literal argument; no shell
-expansion, interpolation, pipelines or redirection occurs. A flag with a value takes two items,
-such as `["-q", "85"]`. A single option like `"--quality=85"` remains one item.
-
-For a default chain with a different quality use `OptimizerChainFactory::with_quality(50)?`.
-
-## Writing custom optimizers
-
-Use `std::process::Command` and `run_command` for a custom binary. Implement `can_handle` to choose
-supported images. The chain calls `optimize` only for matching files.
-
-```rust,no_run
-use spatie_image_optimizer::{Error, Image, Logger, Optimizer, OptimizerChain, run_command};
-use std::{process::Command, time::Duration};
-
-struct MyOptimizer;
-impl Optimizer for MyOptimizer {
-    fn name(&self) -> &str { "my-optimizer" }
-    fn can_handle(&self, image: &Image) -> bool { image.mime().is_ok_and(|mime| mime == "image/png") }
-    fn optimize(&self, image: &Image, logger: &dyn Logger, timeout: Duration) -> Result<(), Error> {
-        run_command(Command::new("my-optimizer").arg(image.path()), timeout, logger)
-    }
-}
-
-OptimizerChain::new().add_optimizer(MyOptimizer).optimize("logo.png")?;
-# Ok::<(), Error>(())
-```
-
-## Writing an optimizer without a binary
-
-The same `Optimizer` trait handles APIs and in-process code; no empty binary methods or base class are needed.
-Write the optimized bytes to `image.path()` and return `Result<(), Error>`. Set your network client's
-timeout from the supplied duration. Keep scratch files in RAII owners such as `tempfile::NamedTempFile`
-so they are removed before the error callback runs. Self-handling failures use the same error policy as binaries.

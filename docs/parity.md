@@ -1,9 +1,9 @@
 ---
 title: PHP and Rust API
-weight: 7
+weight: 10
 ---
 
-Reference: `spatie/image-optimizer` at [fc6cff0](https://github.com/spatie/image-optimizer/commit/fc6cff0c6f16c3a2616d909fa03c6dbc6062b39a).
+If you've used [spatie/image-optimizer](https://github.com/spatie/image-optimizer), most method names will look familiar. This table shows how to use the same operations in Rust.
 
 | PHP feature | Rust API |
 | --- | --- |
@@ -24,19 +24,14 @@ Reference: `spatie/image-optimizer` at [fc6cff0](https://github.com/spatie/image
 | `SelfHandlingOptimizer` and base class | `Optimizer` trait with `optimize` |
 | `getTmpPath` and chain cleanup | RAII temporary PNG owned by AVIF optimization; custom optimizers own their resources |
 
-All PHP optimization features, defaults and failure-policy modes are represented. Rust uses a single
-trait for binary and self-handling implementations, typed tools instead of class-string configuration,
-consuming builders and `Result` instead of mutation, mixed arrays and exceptions.
+Use the `Optimizer` trait for both command-line tools and optimizers that call an API. Configuration methods consume and return the chain, so keep the returned value or chain the calls together. Methods that can fail return `Result`; use `?` to pass an error to your caller.
 
-Deliberate differences: no shell evaluation of options, aliases rejected for source-preserving output,
-MIME detection uses a bundled Rust database rather than PHP's system libmagic, only regular local files
-are accepted, and Rust panics are not swallowed. File URLs resolve to local paths before execution.
-Custom optimizers are `Send + Sync` and use RAII rather than a shared mutable temporary-path property.
-Native-tool version differences can change encoded bytes and the set of accepted command options.
+## Differences to keep in mind
 
-Rust-only additions are opt-in `.safe_output(true)` and the `optimize_with_report` /
-`optimize_to_with_report` methods. Safe output preserves the destination on any optimizer failure
-and only publishes smaller candidates; separate output falls back to an original-byte copy when
-there is no reduction. Reports expose sizes, durations and per-optimizer outcomes without changing
-the existing methods' return types. Default direct-write behavior is unchanged.
-See [usage](usage.md#keeping-the-original-safe) for the full acceptance table and filesystem limits.
+- Options are literal arguments, not shell commands. Pass a flag and its value as separate items, such as `["-q", "85"]`.
+- Input must be a regular local file. Local file URLs are resolved to paths. A separate output must not point to the source, including through hard links.
+- MIME detection uses a bundled Rust database rather than PHP's system libmagic, so unusual files may be classified differently.
+- Rust panics are not caught. Custom optimizers must implement `Send + Sync` and own their temporary files so Rust can clean them up when they go out of scope.
+- Native-tool versions affect encoded bytes and accepted options. Check the tool versions when comparing results across systems.
+
+You can also enable [safe output](usage.md#keeping-the-original-safe) or request [optimization reports](usage.md#reading-optimization-reports). These are additions to the PHP API. They are opt-in; the default methods still write directly and return `Result<(), Error>`.

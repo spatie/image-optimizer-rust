@@ -3,9 +3,19 @@ title: Testing
 weight: 9
 ---
 
-Run `cargo test --locked --all-targets` and `cargo test --locked --doc` without external tools.
-The native suite requires all tools and runs separately with
-`cargo test --locked --test native_tools -- --ignored --nocapture`.
+You can run the tests with Cargo:
 
-CI checks Linux, macOS and Windows on stable, Rust 1.89 on Linux, rustfmt, strict Clippy and
-warning-free rustdoc. A dedicated Linux job installs codecs and SVGO and runs the native suite.
+```sh
+cargo test --locked --all-targets
+cargo test --locked --doc
+```
+
+These tests don't require external tools. To test real image conversions, install all the [optimization tools](installation-and-setup.md#optimization-tools) and run:
+
+```sh
+cargo test --locked --test native_tools -- --ignored --nocapture
+```
+
+The native tests check that all six formats shrink, source files remain unchanged, and AVIF output can be decoded. They also check quality settings and cleanup after an encoder failure.
+
+CI runs the tests on Linux, macOS and Windows, checks Rust 1.89 on Linux, and runs rustfmt, Clippy and rustdoc. A separate Linux job runs the native tests with the tools installed.

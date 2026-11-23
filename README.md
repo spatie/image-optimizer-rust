@@ -1,32 +1,22 @@
 # Easily optimize images using Rust
 
-A standalone Rust port of [spatie/image-optimizer](https://github.com/spatie/image-optimizer).
-Optimize JPEG, PNG, SVG, GIF, WebP and AVIF files with an ordered chain of native tools.
+This package can optimize PNGs, JPGs, WEBPs, AVIFs, SVGs and GIFs by running them through a chain of various [image optimization tools](docs/which-tools-will-do-what.md). Here's how you can use it:
 
 ```rust,no_run
 use spatie_image_optimizer::OptimizerChainFactory;
 
-OptimizerChainFactory::create().optimize("photo.jpg")?;
-OptimizerChainFactory::create().optimize_to("photo.jpg", "optimized.jpg")?;
+let optimizer_chain = OptimizerChainFactory::create();
+optimizer_chain.optimize("photo.jpg")?;
 # Ok::<(), spatie_image_optimizer::Error>(())
 ```
 
-For new integrations, use safe output to keep the original on failures or when the candidate is not smaller:
+The image at `photo.jpg` will be overwritten by an optimized version. The package automatically decides which tools to use for the image's format. Install the [binaries you need](docs/installation-and-setup.md#optimization-tools) first. By default, failures, including missing binaries, are logged and the chain continues.
 
-```rust,no_run
-use spatie_image_optimizer::{OptimizerChainFactory, OutputStatus};
+To keep the original image, use `optimize_to("photo.jpg", "optimized.jpg")`. To replace a file only when optimization succeeds and makes it smaller, enable [safe output](docs/usage.md#keeping-the-original-safe).
 
-let report = OptimizerChainFactory::create()
-    .safe_output(true)
-    .optimize_with_report("photo.jpg")?;
+Here are some [example conversions](docs/example-conversions.md) that have been done by this package.
 
-if report.status == OutputStatus::Discarded {
-    eprintln!("Optimization failed; the original is unchanged");
-} else {
-    println!("Saved {} bytes in {:?}", report.bytes_saved(), report.elapsed);
-}
-# Ok::<(), spatie_image_optimizer::Error>(())
-```
+This is the Rust version of [spatie/image-optimizer](https://github.com/spatie/image-optimizer).
 
 ## Support us
 
@@ -34,15 +24,17 @@ Support our open source work by [buying one of our products](https://spatie.be/o
 
 ## Installation
 
-Requires Rust 1.89 or newer. This crate is not published; use a local path dependency:
+You can install the package from GitHub. Add this dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-spatie-image-optimizer = { path = "../rust-image-optimizer" }
+spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust", branch = "main" }
 ```
 
+Requires Rust 1.89 or newer. The crate is not yet published to crates.io. Commit your application's `Cargo.lock` to keep the selected Git revision between builds.
+
 Install the [native optimization tools](docs/installation-and-setup.md) you need.
-Missing binaries are logged and skipped by default, just like other optimizer failures.
+Missing binaries are logged and the chain continues by default, just like other optimizer failures.
 Use `.throws(true)` to make failures abort instead.
 
 ## Which tools will do what?
@@ -66,7 +58,11 @@ Use `.use_logger(TracingLogger)` or a custom logger. See [logging](docs/logging-
 
 ## Example conversions
 
-See [example conversions](docs/example-conversions.md) for reproducible native-tool tests.
+See [example conversions](https://spatie.be/docs/image-optimizer-rust/v1/example-conversions) for before and after images, measured file sizes and code to try the conversions yourself.
+
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Testing
 
@@ -84,14 +80,10 @@ cargo test --locked --test native_tools -- --ignored --nocapture
 The last command requires all native tools. CI runs it in a separate Linux job.
 The other tests do not require installed codecs.
 
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
-
 ## Contributing
 
 See [Spatie's contribution guidelines](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md).
-The [parity reference](docs/parity.md) records the PHP-to-Rust API and deliberate safety differences.
+The [PHP and Rust API guide](docs/parity.md) shows the corresponding method names and differences to keep in mind.
 
 ## Security
 

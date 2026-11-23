@@ -1,25 +1,37 @@
 ---
-title: Installation and setup
-weight: 2
+title: Installation
+weight: 3
 ---
 
-Requires Rust 1.89 or newer. This crate is not yet published to crates.io.
+You can install the package from GitHub. Add this dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-spatie-image-optimizer = { path = "../rust-image-optimizer" }
+spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust", branch = "main" }
 ```
+
+Requires Rust 1.89 or newer. The crate is not yet published to crates.io. Commit your application's `Cargo.lock` to keep the selected Git revision between builds.
 
 ## Optimization tools
 
-On Ubuntu or Debian:
+The package uses these optimizers for matching image formats:
+
+- [Jpegoptim](https://github.com/tjko/jpegoptim)
+- [Optipng](https://optipng.sourceforge.net/)
+- [Pngquant](https://pngquant.org/)
+- [SVGO](https://github.com/svg/svgo)
+- [Gifsicle](https://www.lcdf.org/gifsicle/)
+- [cwebp](https://developers.google.com/speed/webp/docs/precompiled)
+- [avifdec and avifenc](https://github.com/AOMediaCodec/libavif)
+
+Here's how to install all the optimizers on Ubuntu or Debian:
 
 ```sh
 sudo apt-get install jpegoptim optipng pngquant gifsicle webp libavif-bin
 npm install -g svgo@3
 ```
 
-On macOS with Homebrew:
+And here's how to install the binaries on macOS using [Homebrew](https://brew.sh/):
 
 ```sh
 brew install jpegoptim optipng pngquant gifsicle webp libavif
