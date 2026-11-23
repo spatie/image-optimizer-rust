@@ -2,19 +2,19 @@
 
 This package can optimize PNGs, JPGs, WEBPs, AVIFs, SVGs and GIFs by running them through a chain of various [image optimization tools](docs/which-tools-will-do-what.md). Here's how you can use it:
 
-```rust,no_run
+```rust,ignore
 use spatie_image_optimizer::OptimizerChainFactory;
 
 let optimizer_chain = OptimizerChainFactory::create();
-optimizer_chain.optimize("photo.jpg")?;
-# Ok::<(), spatie_image_optimizer::Error>(())
+
+optimizer_chain.optimize(path_to_image)?;
 ```
 
-The image at `photo.jpg` will be overwritten by an optimized version. The package automatically decides which tools to use for the image's format. Install the [binaries you need](docs/installation-and-setup.md#optimization-tools) first. By default, failures, including missing binaries, are logged and the chain continues.
-
-To keep the original image, use `optimize_to("photo.jpg", "optimized.jpg")`. To replace a file only when optimization succeeds and makes it smaller, enable [safe output](docs/usage.md#keeping-the-original-safe).
+The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image. Install the [binaries you need](docs/installation-and-setup.md#optimization-tools) first. Missing binaries are logged and the chain continues; they are not skipped by an installation check.
 
 Here are some [example conversions](docs/example-conversions.md) that have been done by this package.
+
+To keep the original image, use `optimize_to(path_to_image, path_to_output)`. To replace a file only when optimization succeeds and makes it smaller, enable [safe output](docs/usage.md#keeping-the-original-safe).
 
 This is the Rust version of [spatie/image-optimizer](https://github.com/spatie/image-optimizer).
 
@@ -24,7 +24,7 @@ Support our open source work by [buying one of our products](https://spatie.be/o
 
 ## Installation
 
-You can install the package from GitHub. Add this dependency to your `Cargo.toml`:
+You can install the package via Cargo. Add this Git dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -75,10 +75,13 @@ cargo test --locked --all-targets
 cargo test --locked --doc
 RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps
 cargo test --locked --test native_tools -- --ignored --nocapture
+cargo test --locked --test documentation -- --ignored
 ```
 
-The last command requires all native tools. CI runs it in a separate Linux job.
+The last two commands require the native tools. CI runs them in a separate Linux job.
 The other tests do not require installed codecs.
+
+The `documentation` target compiles and runs every Rust code block from this README and `docs/` with temporary images and application context. Rustdoc skips these fragments; this target executes them.
 
 ## Contributing
 

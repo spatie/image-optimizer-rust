@@ -3,7 +3,7 @@ title: Installation
 weight: 3
 ---
 
-You can install the package from GitHub. Add this dependency to your `Cargo.toml`:
+You can install the package via Cargo. Add this Git dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -26,21 +26,21 @@ The package uses these optimizers for matching image formats:
 - [cwebp](https://developers.google.com/speed/webp/docs/precompiled)
 - [avifdec and avifenc](https://github.com/AOMediaCodec/libavif)
 
-Here's how to install all the optimizers on Ubuntu or Debian:
+Here's how to install all the optimizers on Ubuntu/Debian:
 
 ```sh
 sudo apt-get install jpegoptim optipng pngquant gifsicle webp libavif-bin
 npm install -g svgo@3
 ```
 
-And here's how to install the binaries on macOS using [Homebrew](https://brew.sh/):
+And here's how to install the binaries on MacOS (using [Homebrew](https://brew.sh/)):
 
 ```sh
 brew install jpegoptim optipng pngquant gifsicle webp libavif
 npm install -g svgo@3
 ```
 
-On Fedora:
+And here's how to install the binaries on Fedora/RHEL/CentOS:
 
 ```sh
 sudo dnf install jpegoptim optipng pngquant gifsicle libwebp-tools libavif-tools

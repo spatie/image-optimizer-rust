@@ -54,3 +54,4 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y jpegoptim optipng pngquant gifsicle webp libavif-bin
       - run: npm install --global svgo@3
       - run: cargo test --locked --test native_tools -- --ignored --nocapture
+      - run: cargo test --locked --test documentation -- --ignored

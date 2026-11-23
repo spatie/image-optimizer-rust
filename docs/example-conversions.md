@@ -3,7 +3,7 @@ title: Example conversions
 weight: 7
 ---
 
-Here are some real-life example conversions done by this package.
+Here are some real life example conversions done by this package.
 
 The JPG, WebP, AVIF, PNG and SVG sources are the same images used by [spatie/image-optimizer](https://github.com/spatie/image-optimizer#example-conversions), optimized with the Rust package's default chain. The photo by [Jeff Sheldon](https://unsplash.com/photos/jTeQavJjBDs) was resized to 2048 pixels wide for the original PHP examples. We used those existing fixtures without resizing them again. The GIF is an additional test fixture in this Rust package.
 
@@ -80,23 +80,4 @@ Optimized, 609,977 bytes (6.47% smaller):
 
 ![Optimized animated GIF](/docs/image-optimizer-rust/v1/examples/animated.gif)
 
-## Trying it yourself
-
-Install the [optimization tools](installation-and-setup.md#optimization-tools), clone the repository and run this code from its root. It writes the results to `optimized-examples` and leaves the source images untouched:
-
-```rust,no_run
-use spatie_image_optimizer::OptimizerChainFactory;
-use std::{fs, path::Path};
-
-fs::create_dir_all("optimized-examples")?;
-for name in ["image.jpg", "image.webp", "image.avif", "logo.png", "graph.svg", "animated.gif"] {
-    let source = Path::new("tests/fixtures").join(name);
-    let output = Path::new("optimized-examples").join(name);
-    let report = OptimizerChainFactory::create()
-        .safe_output(true)
-        .throws(true)
-        .optimize_to_with_report(&source, &output)?;
-    println!("{name}: {} -> {} bytes", report.original_bytes, fs::metadata(output)?.len());
-}
-# Ok::<(), spatie_image_optimizer::Error>(())
-```
+To try these conversions yourself, use the [default chain](usage.md) with the images in `tests/fixtures`. Use `optimize_to` to keep the source images untouched. The [native tests](testing.md) run every format and check the output.
