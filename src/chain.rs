@@ -79,6 +79,17 @@ pub struct OptimizerChain {
     safe_output: bool,
 }
 
+impl std::fmt::Debug for OptimizerChain {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("OptimizerChain")
+            .field("optimizer_count", &self.optimizers.len())
+            .field("timeout", &self.timeout)
+            .field("throws", &self.throws)
+            .field("safe_output", &self.safe_output)
+            .finish_non_exhaustive()
+    }
+}
+
 impl Default for OptimizerChain {
     fn default() -> Self {
         Self::new()

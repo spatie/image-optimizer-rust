@@ -1,3 +1,5 @@
+//! Compile the Markdown examples into native-tool integration tests.
+
 use std::{env, fs, path::PathBuf};
 
 fn main() -> std::io::Result<()> {

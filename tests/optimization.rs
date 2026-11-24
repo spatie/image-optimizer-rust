@@ -1,3 +1,5 @@
+//! Optimizer configuration and execution using fixture commands.
+
 use spatie_image_optimizer::{
     DummyLogger, Error, Image, Level, Logger, Optimizer, OptimizerChain, OptimizerChainFactory,
     OptimizerStatus, OutputStatus, Tool, run_command,
