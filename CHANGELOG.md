@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Compile all guide examples with rustdoc using hidden setup, and execute the same examples in native-tool tests.
 - Add opt-in safe output, size-based acceptance and atomic replacement where supported by the filesystem.
 - Add optimization reports with candidate size, published savings, timings and per-optimizer outcomes.
 - Document error handling, unchanged output, destination preservation and filesystem limits.

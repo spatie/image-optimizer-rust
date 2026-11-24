@@ -333,6 +333,7 @@ impl OptimizerChain {
 }
 
 /// Build the PHP package's default chain and quality settings.
+#[derive(Debug)]
 pub struct OptimizerChainFactory;
 
 impl OptimizerChainFactory {

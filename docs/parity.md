@@ -11,7 +11,12 @@ See [PARITY.md](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.
 
 Enable `safe_output(true)` to optimize a working copy before replacing the destination:
 
-```rust,ignore
+```rust,no_run
+# fn main() -> Result<(), spatie_image_optimizer::Error> {
+# let directory = tempfile::tempdir()?;
+# let source = directory.path().join("image.jpg");
+# std::fs::copy(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/image.jpg"), &source)?;
+# let path_to_image = source.as_path();
 use spatie_image_optimizer::{OptimizerChainFactory, OutputStatus};
 
 let report = OptimizerChainFactory::create()
@@ -23,11 +28,20 @@ match report.status {
     OutputStatus::KeptOriginal => println!("No size reduction; kept the original"),
     OutputStatus::Discarded => eprintln!("An optimizer failed; kept the original"),
 }
+# Ok(())
+# }
 ```
 
 To preserve the source and use a separate destination:
 
-```rust,ignore
+```rust,no_run
+# fn main() -> Result<(), spatie_image_optimizer::Error> {
+# let directory = tempfile::tempdir()?;
+# let source = directory.path().join("image.jpg");
+# let output = directory.path().join("optimized.jpg");
+# std::fs::copy(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/image.jpg"), &source)?;
+# let path_to_image = source.as_path();
+# let path_to_output = output.as_path();
 use spatie_image_optimizer::OptimizerChainFactory;
 
 let report = OptimizerChainFactory::create()
@@ -35,6 +49,10 @@ let report = OptimizerChainFactory::create()
     .throws(true)
     .optimize_to_with_report(path_to_image, path_to_output)?;
 println!("{:?}: {} bytes saved", report.status, report.bytes_saved());
+# assert_eq!(spatie_image_optimizer::Image::new(&output)?.mime()?, "image/jpeg");
+# assert_eq!(std::fs::read(&source)?, std::fs::read(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/image.jpg"))?);
+# Ok(())
+# }
 ```
 
 Read the [safety contract](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#keeping-the-original-safe). This is not a sandbox or an image-validity check.
@@ -45,7 +63,12 @@ Read the [safety contract](https://github.com/spatie/image-optimizer-rust/blob/m
 
 Use `optimize_with_report` or `optimize_to_with_report` with any chain, with or without safe output:
 
-```rust,ignore
+```rust,no_run
+# fn main() -> Result<(), spatie_image_optimizer::Error> {
+# let directory = tempfile::tempdir()?;
+# let source = directory.path().join("image.jpg");
+# std::fs::copy(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/image.jpg"), &source)?;
+# let path_to_image = source.as_path();
 use spatie_image_optimizer::{OptimizerChainFactory, OptimizerStatus};
 
 let report = OptimizerChainFactory::create()
@@ -61,6 +84,8 @@ for optimizer in &report.optimizers {
         OptimizerStatus::Failed(message) => eprintln!("{}: {message}", optimizer.name),
     }
 }
+# Ok(())
+# }
 ```
 
 See the [field reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#reading-optimization-reports). Aborted chains return `Err`, not partial reports.

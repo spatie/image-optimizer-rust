@@ -5,6 +5,7 @@ edition = "2024"
 rust-version = "1.89"
 description = "Optimize images with a configurable chain of native tools"
 license = "MIT"
+repository = "https://github.com/spatie/image-optimizer-rust"
 keywords = ["image", "optimization", "compression"]
 categories = ["multimedia::images"]
 

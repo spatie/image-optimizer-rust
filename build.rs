@@ -32,7 +32,7 @@ fn main() -> std::io::Result<()> {
                     if rust {
                         number += 1;
                         tests.push_str(&format!(
-                            "documentation_example!({name}_{number}, (optimizer_chain, path_to_image, path_to_output), {{\n{code}}});\n"
+                            "documentation_example!({name}_{number}, {{\n{code}}});\n"
                         ));
                     }
                     code.clear();
@@ -40,6 +40,15 @@ fn main() -> std::io::Result<()> {
                     fence = Some(language.split(',').next() == Some("rust"));
                 }
             } else if fence == Some(true) {
+                let line = if line == "#" {
+                    ""
+                } else if let Some(hidden) = line.strip_prefix("# ") {
+                    hidden
+                } else if line.starts_with("##") {
+                    &line[1..]
+                } else {
+                    line
+                };
                 code.push_str(line);
                 code.push('\n');
             }

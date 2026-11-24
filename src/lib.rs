@@ -86,6 +86,7 @@ impl<F: Fn(Level, &str) + Send + Sync> Logger for F {
 }
 
 /// Default silent logger.
+#[derive(Debug)]
 pub struct DummyLogger;
 
 impl Logger for DummyLogger {
@@ -93,6 +94,7 @@ impl Logger for DummyLogger {
 }
 
 /// Routes log messages to the application's `tracing` subscriber.
+#[derive(Debug)]
 pub struct TracingLogger;
 
 impl Logger for TracingLogger {
@@ -120,8 +122,12 @@ pub trait Optimizer: Send + Sync {
 
 #[cfg(doctest)]
 mod guide {
+    #[doc = include_str!("../docs/introduction.md")]
+    mod introduction {}
     #[doc = include_str!("../docs/usage.md")]
     mod usage {}
     #[doc = include_str!("../docs/logging-the-optimization-process.md")]
     mod logging {}
+    #[doc = include_str!("../docs/parity.md")]
+    mod parity {}
 }

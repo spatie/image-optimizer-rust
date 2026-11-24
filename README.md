@@ -2,12 +2,20 @@
 
 This package can optimize PNGs, JPGs, WEBPs, AVIFs, SVGs and GIFs by running them through a chain of various [image optimization tools](docs/which-tools-will-do-what.md). Here's how you can use it:
 
-```rust,ignore
+```rust,no_run
+# fn main() -> Result<(), spatie_image_optimizer::Error> {
+# let directory = tempfile::tempdir()?;
+# let source = directory.path().join("image.jpg");
+# std::fs::copy(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/image.jpg"), &source)?;
+# let path_to_image = source.as_path();
 use spatie_image_optimizer::OptimizerChainFactory;
 
 let optimizer_chain = OptimizerChainFactory::create();
 
 optimizer_chain.optimize(path_to_image)?;
+# assert_eq!(spatie_image_optimizer::Image::new(&source)?.mime()?, "image/jpeg");
+# Ok(())
+# }
 ```
 
 The image at `path_to_image` will be overwritten by an optimized version which should be smaller. The package will automatically decide which tools to use on a particular image.
@@ -77,7 +85,7 @@ The last two commands require the native tools. The other tests do not require i
 
 CI runs on Linux, macOS and Windows, checks Rust 1.89 on Linux, and runs rustfmt, Clippy and rustdoc. A separate Linux job runs the native and documentation tests with the tools installed.
 
-The `documentation` target compiles and runs every Rust code block from this README and `docs/` with temporary images and application context. Rustdoc skips these fragments; this target executes them.
+Rustdoc compiles every Rust code block from this README and `docs/`. Setup uses hidden `# ` lines so the displayed examples stay close to PHP. Native examples use `no_run` in rustdoc; the `documentation` target executes those same self-contained examples with the tools installed.
 
 ## Contributing
 
