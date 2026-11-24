@@ -19,7 +19,7 @@ cargo test --locked --test native_tools -- --ignored --nocapture
 cargo test --locked --test documentation -- --ignored
 ```
 
-The [README testing section](https://github.com/spatie/image-optimizer-rust#testing) describes example setup, native test coverage and CI checks.
+The [README testing section](https://github.com/spatie/image-optimizer-rust/blob/main/README.md#testing) describes example setup, native test coverage and CI checks.
 
 Set `RUSTFLAGS` and `RUSTDOCFLAGS` to `-D warnings` to match CI. Check the minimum supported Rust version with `cargo +1.89.0 test --locked --all-targets --all-features` and `cargo +1.89.0 test --locked --doc --all-features`.
 
