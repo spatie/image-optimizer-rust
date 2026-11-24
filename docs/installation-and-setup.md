@@ -3,14 +3,14 @@ title: Installation
 weight: 3
 ---
 
-You can install the package via Cargo. Add this Git dependency to your `Cargo.toml`:
+You can install the package via Cargo. Add the crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust", branch = "main" }
+spatie-image-optimizer = "1"
 ```
 
-Requires Rust 1.89 or newer. Not yet published to crates.io.
+Requires Rust 1.89 or newer.
 
 <a id="optimization-tools"></a>
 

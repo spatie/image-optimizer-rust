@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 - 2026-11-24
 
 - Compile all guide examples with rustdoc using hidden setup, and execute the same examples in native-tool tests.
 - Add opt-in safe output, size-based acceptance and atomic replacement where supported by the filesystem.

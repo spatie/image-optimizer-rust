@@ -41,14 +41,14 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 
 ## Installation
 
-You can install the package via Cargo. Add this Git dependency to your `Cargo.toml`:
+You can install the package via Cargo. Add the crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-spatie-image-optimizer = { git = "https://github.com/spatie/image-optimizer-rust", branch = "main" }
+spatie-image-optimizer = "1"
 ```
 
-Requires Rust 1.89 or newer. The crate is not yet published to crates.io. Commit your application's `Cargo.lock` to keep the selected Git revision between builds.
+Requires Rust 1.89 or newer.
 
 Install the [native optimization tools](docs/installation-and-setup.md) you need.
 Missing binaries are logged and the chain continues by default, just like other optimizer failures.
