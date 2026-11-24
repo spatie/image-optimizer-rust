@@ -128,6 +128,6 @@ mod guide {
     mod usage {}
     #[doc = include_str!("../docs/logging-the-optimization-process.md")]
     mod logging {}
-    #[doc = include_str!("../docs/parity.md")]
-    mod parity {}
+    #[doc = include_str!("../docs/safe-output-and-reports.md")]
+    mod safe_output_and_reports {}
 }

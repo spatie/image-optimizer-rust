@@ -136,7 +136,7 @@ optimizer_chain
 
 Any error raised while applying an optimizer, most notably a process timeout when an optimizer exceeds its [timeout](#setting-a-timeout), flows through this same mechanism. With the default (or `throws(false)`) it is caught and the chain continues; with `throws(true)` or a closure you get to inspect and decide what to do with it.
 
-Validation and filesystem errors still return `Err`. See the [Rust error reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#chain-configuration-and-errors) for timeout limits, callback replacement and process diagnostics. `report` above is your application's error-reporting function.
+Validation and filesystem errors still return `Err`. Calling `throws` replaces a custom handler. A timeout returns `Error::Timeout`; `Error::Process` includes the exit code, stdout and stderr. Rust panics are not caught. `report` above is your application's error-reporting function.
 
 ## Creating your own optimization chains
 
@@ -239,16 +239,16 @@ impl Optimizer for ApiOptimizer {
 
 Add it to a chain with `add_optimizer` just like any other optimizer. Failures are governed by [`throws`](#handling-errors) in exactly the same way as binary optimizers: by default the failure is logged and the chain continues, while `throws(true)` (or a closure) lets you abort or handle it.
 
-Set your network client's timeout from the supplied duration. Custom optimizers own and clean up their scratch files. Commands use literal arguments, not a shell; see the [configuration reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#chain-configuration-and-errors).
+Set your network client's timeout from the supplied duration. Custom optimizers own and clean up their scratch files. Commands use literal arguments, not a shell. Pass `["-q", "85"]`, not `["-q 85"]`. `set_options` replaces arguments, `set_binary_path` selects their directory, `set_binary_name` overrides an executable and `set_decode_binary_name` overrides the AVIF decoder. Zero disables binary timeouts. A timed-out direct child is killed and reaped; independently spawned descendants are not.
 
 <a id="keeping-the-original-safe"></a>
 
 ## Keeping the original safe
 
-Direct writes can leave partial or larger files. Use `safe_output(true)` for safer replacement; read the [examples and safety contract](parity.md#keeping-the-original-safe). This is not a sandbox or an image-validity check.
+Direct writes can leave partial or larger files. Use `safe_output(true)` for safer replacement; read the [examples and safety contract](safe-output-and-reports.md#keeping-the-original-safe). This is not a sandbox or an image-validity check.
 
 <a id="reading-optimization-reports"></a>
 
 ## Reading optimization reports
 
-Use `optimize_with_report` or `optimize_to_with_report` for sizes, timing and per-optimizer outcomes. See the [report example and field reference](parity.md#reading-optimization-reports); check `report.status` before assuming a file was published.
+Use `optimize_with_report` or `optimize_to_with_report` for sizes, timing and per-optimizer outcomes. See the [report example and field reference](safe-output-and-reports.md#reading-optimization-reports); check `report.status` before assuming a file was published.

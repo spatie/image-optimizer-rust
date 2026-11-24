@@ -1,9 +1,9 @@
 ---
-title: PHP and Rust API
+title: Safe output and reports
 weight: 10
 ---
 
-See [PARITY.md](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md) for method mappings, configuration and the complete safety/reporting contract.
+Safe output optimizes a working copy and only publishes a smaller, error-free candidate. Reports expose sizes, timing and individual optimizer outcomes.
 
 <a id="keeping-the-original-safe"></a>
 
@@ -55,7 +55,13 @@ println!("{:?}: {} bytes saved", report.status, report.bytes_saved());
 # }
 ```
 
-Read the [safety contract](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#keeping-the-original-safe). This is not a sandbox or an image-validity check.
+The working copy lives in a private temporary directory beside the destination. Use a trusted, writable parent directory with enough space for the copy and encoder scratch files. Destination symlinks and separate-output source aliases, including hard links, are rejected.
+
+If the candidate is not smaller or no tools match, in-place optimization keeps the original and separate-output optimization writes a copy of the source. If any optimizer fails under a continuing error policy, the entire candidate is discarded and an existing destination stays untouched. Check `OutputStatus::Discarded`; `Ok` alone does not mean a file was published. Use `throws(true)` to abort on optimizer failures.
+
+Publication uses a same-filesystem rename, atomic where supported. Existing destinations retain their `std::fs::Permissions`; new outputs copy the source permissions. Ownership, ACLs, extended attributes and timestamps may change. Other hard links and open handles still refer to the old file. There is no `fsync` or power-loss durability guarantee. Forced termination may leave scratch files behind.
+
+Custom optimizers receive the working path. Supply explicit configuration paths when an encoder discovers configuration relative to its input. This is not a sandbox or an image-validity check. Keep encoders updated and isolate untrusted uploads at the operating-system level.
 
 <a id="reading-optimization-reports"></a>
 
@@ -88,4 +94,8 @@ for optimizer in &report.optimizers {
 # }
 ```
 
-See the [field reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#reading-optimization-reports). Aborted chains return `Err`, not partial reports.
+`input` and `output` identify the requested paths. `original_bytes` is the input size before optimization. `candidate_bytes` is the working size before acceptance, not the final output size; it can be larger or `None` after a failure. `bytes_saved()` counts published reduction against the source and returns zero for growth, retained originals and discarded candidates.
+
+`optimizers` lists entries in execution order. `Skipped` means the optimizer does not handle that format; `Succeeded` does not guarantee smaller output. `Failed(String)` records a continued error. Total `elapsed` includes preparation and publication; per-tool times include support checks.
+
+Without safe output, `Written` can include larger or partial output after a continued error. Use `on_error` or `throws(true)` for typed errors. Aborted chains return `Err`, not partial reports.

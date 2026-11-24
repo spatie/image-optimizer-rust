@@ -62,7 +62,7 @@ The package will automatically decide which tools to use on a particular image. 
 
 ### Configuring the chain
 
-See [usage](docs/usage.md) for timeouts, errors, custom chains and custom optimizers. The [PHP and Rust API reference](PARITY.md) covers quality settings, literal command arguments and Rust-specific behavior. [Safe output and reports](docs/parity.md) are opt-in additions.
+See [usage](docs/usage.md) for timeouts, errors, custom chains and custom optimizers. [Safe output and reports](docs/safe-output-and-reports.md) are opt-in additions.
 
 ### Logging the optimization process
 
@@ -106,7 +106,7 @@ Using an AI coding agent? Load Apollo's [rust-best-practices skill](https://gith
 
 Report vulnerabilities privately using the instructions in [SECURITY.md](https://github.com/spatie/image-optimizer-rust/blob/main/SECURITY.md).
 
-Only local files are accepted. Native image tools process untrusted data in your process's security context; keep them updated and use operating-system isolation for untrusted uploads. Default in-place optimization is not transactional. An encoder failure can leave a partial output. Use `safe_output(true)` to work on a copy and publish only a smaller, error-free candidate. This is not a sandbox or an image-validity check. Use `optimize_to` when you also want to keep the source after successful optimization. Read the [full safety contract](PARITY.md#keeping-the-original-safe) before relying on replacement guarantees.
+Only local files are accepted. Native image tools process untrusted data in your process's security context; keep them updated and use operating-system isolation for untrusted uploads. Default in-place optimization is not transactional. An encoder failure can leave a partial output. Use `safe_output(true)` to work on a copy and publish only a smaller, error-free candidate. This is not a sandbox or an image-validity check. Use `optimize_to` when you also want to keep the source after successful optimization. Read the [full safety contract](docs/safe-output-and-reports.md#keeping-the-original-safe) before relying on replacement guarantees.
 
 ## Credits
 

@@ -16,7 +16,7 @@ JPGs will be made smaller by running them through [Jpegoptim](https://github.com
 
 ## PNGs
 
-PNGs will be made smaller by running them through two tools. The first one is [Pngquant 2](https://pngquant.org/), a lossy PNG compressor. Unlike the PHP defaults, these options are used:
+PNGs will be made smaller by running them through two tools. The first one is [Pngquant 2](https://pngquant.org/), a lossy PNG compressor. These options are used:
 
 - `--quality=85`: sets the maximum quality to 85.
 - `--force`: allows overwriting the output file.
@@ -29,7 +29,7 @@ After that we run the image through a second one: [Optipng](https://optipng.sour
 
 ## SVGs
 
-SVGs will be minified by [SVGO](https://github.com/svg/svgo). SVGO's default configuration will be used. Unlike PHP, no plugins are disabled; see [configuring SVGO](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#inputs-and-native-tools) to preserve IDs and `viewBox`.
+SVGs will be minified by [SVGO](https://github.com/svg/svgo) with its installed default configuration. To preserve IDs or a `viewBox`, pass `--config` and the path to your configuration using `Tool::Svgo.with_options`. Check the rendered image, especially when other elements reference its IDs.
 
 Please be aware that SVGO can break your svg. You'll find more info on that in this [excellent blogpost](https://www.sarasoueidan.com/blog/svgo-tools/) by [Sara Soueidan](https://twitter.com/SaraSoueidan).
 
@@ -66,8 +66,8 @@ AVIFs will be optimized by [avifenc](https://github.com/AOMediaCodec/libavif/blo
 
 (Settings are originally taken from [here](https://web.dev/compress-images-avif/#create-an-avif-image-with-default-settings) and [here](https://github.com/feat-agency/avif).)
 
-AVIF also needs `avifdec`; see the [decoder reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#inputs-and-native-tools).
+AVIF also needs `avifdec`. It decodes into a temporary PNG using `-j all --ignore-icc --no-strict --png-compress 0`. Both processes share the optimizer's timeout budget and the PNG is removed on success or error. Set encoder options to `["-j", "1"]` when CPU resources are limited.
 
 ## Changing the quality
 
-Use `OptimizerChainFactory::with_quality(q)?`; see the [quality reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#inputs-and-native-tools).
+Use `OptimizerChainFactory::with_quality(q)?` with a quality from 0 through 100. It sets JPEG, PNG and WebP quality to `q`, and AVIF `cq-level` to `round(63 - q * 0.63)`.

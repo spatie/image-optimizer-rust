@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 - 2026-11-24
+
+- Give safe output and optimization reports a dedicated guide, including filesystem limits.
+
 ## 1.0.0 - 2026-11-24
 
 - Compile all guide examples with rustdoc using hidden setup, and execute the same examples in native-tool tests.

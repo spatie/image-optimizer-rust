@@ -47,4 +47,4 @@ optimizer_chain
 # }
 ```
 
-See the [logging reference](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#logging) for closure loggers, error details and sensitive command arguments.
+A closure receiving a `Level` and message also implements `Logger`. Failures include their error details whether the chain continues or aborts. Avoid confidential command arguments when collecting logs centrally. Validation and filesystem failures still return `Err` with the default policy.

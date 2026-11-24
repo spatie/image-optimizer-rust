@@ -47,4 +47,4 @@ sudo dnf install jpegoptim optipng pngquant gifsicle libwebp-tools libavif-tools
 npm install -g svgo@3
 ```
 
-AVIF needs both `avifdec` and `avifenc`. See [native-tool requirements](https://github.com/spatie/image-optimizer-rust/blob/main/PARITY.md#inputs-and-native-tools) for Windows setup, versions and executable overrides.
+AVIF needs both `avifdec` and `avifenc` from libavif 0.9.3 or newer. Node is required for SVGO, not the library itself. On Windows, install the native executables and add them to `PATH`, or set their directory with `set_binary_path`. Missing binaries are optimizer failures, not silent skips. Installed tool versions affect supported flags and encoded output.

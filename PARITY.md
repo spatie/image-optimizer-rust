@@ -61,7 +61,7 @@ Safe output and optimization reports are opt-in additions to the PHP API. The de
 
 Neither `optimize` nor `optimize_to` guarantees a smaller image in the default direct-write mode. A failed optimizer can leave partial changes. For separate output, the output directory must already exist, and the output must not refer to the source, including through a hard link.
 
-Enable `safe_output(true)` to optimize a working copy before replacing the destination. The [safe-output examples](docs/parity.md#keeping-the-original-safe) show in-place and separate-output calls.
+Enable `safe_output(true)` to optimize a working copy before replacing the destination. The [safe-output examples](docs/safe-output-and-reports.md#keeping-the-original-safe) show in-place and separate-output calls.
 
 The chain works on a temporary copy in the destination's parent directory, preserving the filename and extension for tools such as SVGO. Use a trusted, writable parent with enough space for that copy and optimizer scratch files. The temporary directory uses mode `0o700` on Unix and inherits the parent's ACL on Windows.
 
@@ -84,7 +84,7 @@ Custom optimizers and callbacks receive the working path; reports identify the r
 
 ## Reading optimization reports
 
-Use `optimize_with_report` or `optimize_to_with_report` with any chain, with or without safe output. The [report example](docs/parity.md#reading-optimization-reports) prints sizes, timing and per-optimizer outcomes.
+Use `optimize_with_report` or `optimize_to_with_report` with any chain, with or without safe output. The [report example](docs/safe-output-and-reports.md#reading-optimization-reports) prints sizes, timing and per-optimizer outcomes.
 
 - `input` and `output` are requested local paths. File URLs are resolved, not canonicalized.
 - `original_bytes` is the input size before optimization.
